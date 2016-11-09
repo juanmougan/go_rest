@@ -20,6 +20,28 @@ type User struct {
 
 var users []User
 
+// Util functions for Users
+// TODO can I do something like this, and pass some annonymous function?
+/*
+func FindUser(values []User, u User, f func(u1, u2 User) bool) User {
+    for _, v := range values {
+        if f(u, v) {
+            return v
+        }
+    }
+    return nil
+}
+*/
+
+func FindUser(values []User, id int) User {
+    for _, v := range values {
+        if v.Id == id {
+            return v
+        }
+    }
+    return User{Id: 0, FirstName: "", LastName: ""}
+}
+
 // Endpoints
 func index(w http.ResponseWriter, r *http.Request) {
     fmt.Fprintf(w, "Welcome, %s!", r.URL.Path[1:])
@@ -62,9 +84,22 @@ func getUsersEndpoint(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetUserEndpoint(w http.ResponseWriter, r *http.Request) {
-	// id := r.URL.Path[1:]
-	// TODO filter by id
+func getUserEndpoint(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("holaaa")
+	if r.Method == "GET" {
+		id, _ := strconv.Atoi(r.URL.Path[1:])
+		u := FindUser(users, id)
+
+		userJson, err := json.Marshal(u)
+	 
+	    if err != nil {
+	        panic(err)
+	    }
+	 
+	     w.Write(userJson)
+	} else {
+		http.Error(w, "Invalid request method.", 405)
+	}
 }
 
 func GetUserEndpointByLastName(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +144,7 @@ func setUpStaticPages() {
 
 func setUpUsersEndpoint() {
 	http.HandleFunc("/users", getUsersEndpoint)
-//    http.HandleFunc("/users/{id}", GetUserEndpoint).Methods("GET")
+    http.HandleFunc("/users/{id}", getUserEndpoint)
 //    http.HandleFunc("/users/{id}", createUserEndpoint).Methods("POST")
 //    http.HandleFunc("/users/{id}", updateUserEndpoint).Methods("PUT")
 //    http.HandleFunc("/users/{id}", DeleteUserEndpoint).Methods("DELETE")
@@ -122,7 +157,7 @@ func mockData() {
  
 func main() {
     mockData()
-    setUpStaticPages()
     setUpUsersEndpoint()
+    setUpStaticPages()
     http.ListenAndServe(":8080", nil)
 }
