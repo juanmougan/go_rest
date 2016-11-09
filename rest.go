@@ -7,7 +7,7 @@ import (
 )
 
 type Message struct {
-    Text string
+    Text string	`json:"text"`
 }
  
 func index(w http.ResponseWriter, r *http.Request) {
