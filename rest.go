@@ -71,6 +71,11 @@ func getJson(url string, target interface{}) error {
 }
 
 func getUsersEndpoint(w http.ResponseWriter, r *http.Request) {
+	userId, _ := strconv.Atoi(r.URL.Query().Get("id"))
+	if userId != 0 {
+		getUserEndpoint(w, r, userId)
+		return
+	}
 	if r.Method == "GET" {
 		usersJson, err := json.Marshal(users)
 	 
@@ -84,11 +89,11 @@ func getUsersEndpoint(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getUserEndpoint(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("holaaa")
+func getUserEndpoint(w http.ResponseWriter, r *http.Request, userId int) {
 	if r.Method == "GET" {
-		id, _ := strconv.Atoi(r.URL.Path[1:])
-		u := FindUser(users, id)
+		// id, _ := strconv.Atoi(r.URL.Path[1:])
+		// u := FindUser(users, id)
+		u := FindUser(users, userId)
 
 		userJson, err := json.Marshal(u)
 	 
@@ -144,7 +149,6 @@ func setUpStaticPages() {
 
 func setUpUsersEndpoint() {
 	http.HandleFunc("/users", getUsersEndpoint)
-    http.HandleFunc("/users/{id}", getUserEndpoint)
 //    http.HandleFunc("/users/{id}", createUserEndpoint).Methods("POST")
 //    http.HandleFunc("/users/{id}", updateUserEndpoint).Methods("PUT")
 //    http.HandleFunc("/users/{id}", DeleteUserEndpoint).Methods("DELETE")
